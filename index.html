@@ -3,83 +3,119 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Lexicon 3000</title>
+    <title>Lexicon 3000 - Pro</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <style>
-        @import url('https://fonts.googleapis.com/css2?family=Orbitron:wght@700&display=swap');
+        @import url('https://fonts.googleapis.com/css2?family=Orbitron:wght@700&family=Inter:wght@400;700&display=swap');
+        body { font-family: 'Inter', sans-serif; background: #020617; color: white; overflow: hidden; }
         .cyber { font-family: 'Orbitron', sans-serif; }
-        .glass { background: rgba(15, 23, 42, 0.9); backdrop-filter: blur(10px); border: 1px solid rgba(255,255,255,0.1); }
+        .glass { background: rgba(15, 23, 42, 0.8); backdrop-filter: blur(12px); border: 1px solid rgba(255,255,255,0.1); }
     </style>
 </head>
-<body class="bg-[#020617] text-white">
+<body>
 
-    <div class="fixed top-5 right-5 glass p-3 rounded-2xl border-cyan-500/50 flex items-center gap-2">
-        <span class="h-2 w-2 rounded-full bg-cyan-500 animate-pulse"></span>
-        <span class="cyber text-[10px] text-cyan-400">USERS: 5,742</span>
+    <div class="fixed top-5 right-5 z-50 glass px-4 py-2 rounded-2xl border-cyan-500/30 flex items-center gap-2">
+        <span class="relative flex h-3 w-3"><span class="animate-ping absolute h-full w-full rounded-full bg-cyan-400 opacity-75"></span><span class="relative inline-flex rounded-full h-3 w-3 bg-cyan-500"></span></span>
+        <div class="cyber text-[10px] text-cyan-400 uppercase tracking-widest">Bot Users: <span id="user-count">5,742</span></div>
     </div>
 
-    <div id="auth" class="min-h-screen flex items-center justify-center p-4">
-        <div class="glass max-w-sm w-full p-8 rounded-[2rem] text-center">
-            <h1 class="cyber text-2xl mb-6 bg-gradient-to-r from-cyan-400 to-blue-500 bg-clip-text text-transparent">LEXICON 3000</h1>
-            <input id="name" type="text" placeholder="Ism" class="w-full p-4 mb-3 rounded-xl bg-slate-900 border border-white/10 outline-none focus:border-cyan-500">
-            <input id="surname" type="text" placeholder="Familiya" class="w-full p-4 mb-6 rounded-xl bg-slate-900 border border-white/10 outline-none focus:border-cyan-500">
-            <button onclick="start()" class="w-full py-4 bg-cyan-600 rounded-xl cyber text-xs hover:bg-cyan-500 transition-all">START</button>
+    <div id="auth-screen" class="min-h-screen flex items-center justify-center p-6">
+        <div class="glass max-w-md w-full p-10 rounded-[2.5rem] text-center shadow-2xl">
+            <h1 class="cyber text-3xl mb-2 bg-gradient-to-r from-cyan-400 to-blue-500 bg-clip-text text-transparent">LEXICON 3000</h1>
+            <p class="text-slate-400 text-[10px] uppercase tracking-[0.3em] mb-8">Professional Challenge</p>
+            
+            <div id="user-info" class="space-y-4 mb-6">
+                <input id="name" type="text" placeholder="Ismingiz" class="w-full p-4 rounded-xl bg-slate-900/50 border border-white/10 outline-none focus:border-cyan-500 transition-all">
+                <input id="surname" type="text" placeholder="Familiyangiz" class="w-full p-4 rounded-xl bg-slate-900/50 border border-white/10 outline-none focus:border-cyan-500 transition-all">
+            </div>
+
+            <div class="grid grid-cols-2 gap-4 mb-6">
+                <button onclick="selectLang('en')" id="btn-en" class="py-4 rounded-xl border border-white/10 hover:border-cyan-500 transition-all text-xs cyber">ENG 🇺🇸</button>
+                <button onclick="selectLang('ru')" id="btn-ru" class="py-4 rounded-xl border border-white/10 hover:border-cyan-500 transition-all text-xs cyber">RUS 🇷🇺</button>
+            </div>
+
+            <button onclick="startGame()" class="w-full py-4 bg-cyan-600 rounded-xl cyber text-xs font-bold hover:bg-cyan-500 shadow-lg shadow-cyan-900/20 transition-all">START CHALLENGE</button>
         </div>
     </div>
 
-    <div id="game" class="hidden min-h-screen flex flex-col items-center justify-center p-6">
-        <div class="w-full max-w-lg">
-            <div class="flex justify-between items-end mb-4">
-                <span id="p-name" class="text-cyan-400 font-bold"></span>
-                <span id="timer" class="cyber text-4xl text-yellow-400">4.0</span>
+    <div id="game-screen" class="hidden min-h-screen flex flex-col items-center justify-center p-6 text-center">
+        <div class="w-full max-w-xl">
+            <div class="flex justify-between items-end mb-8">
+                <div class="text-left"><p id="display-player" class="text-cyan-400 font-bold"></p><p id="display-lang" class="text-[10px] text-slate-500 cyber"></p></div>
+                <div class="cyber text-4xl text-yellow-400" id="timer">4.0</div>
             </div>
-            <div class="h-1 w-full bg-slate-800 rounded-full mb-10 overflow-hidden">
-                <div id="bar" class="h-full bg-cyan-500 w-full transition-all duration-100"></div>
-            </div>
-            <h2 id="word" class="text-5xl font-black text-center mb-12 uppercase tracking-tighter">APPLE</h2>
+            <div class="h-1.5 w-full bg-slate-800 rounded-full mb-12 overflow-hidden"><div id="p-bar" class="h-full bg-cyan-500 w-full transition-all duration-100"></div></div>
+            <h2 id="word" class="text-6xl font-black mb-12 tracking-tighter uppercase italic">...</h2>
             <div id="options" class="grid grid-cols-1 md:grid-cols-2 gap-4"></div>
         </div>
     </div>
 
     <script>
-        let dictionary = [
-            {q: "Success", c: "Muvaffaqiyat", o: ["Muvaffaqiyat", "Xato", "Baxt", "Boylik"]},
-            {q: "Ability", c: "Qobiliyat", o: ["Qobiliyat", "Kuch", "Bilim", "Imkon"]},
-            // Shuni 3000 tagacha davom ettirish mantiqi bor
-        ];
-        let current = 0, time = 40, timer;
+        let selectedLang = 'en';
+        let currentQ = 0, timer, timeLeft = 40;
+        
+        // 1. ESLAB QOLISH (Local Storage)
+        window.onload = () => {
+            const savedName = localStorage.getItem('lx_name');
+            const savedSurname = localStorage.getItem('lx_surname');
+            if(savedName) document.getElementById('name').value = savedName;
+            if(savedSurname) document.getElementById('surname').value = savedSurname;
+            
+            // Foydalanuvchilar sonini simulyatsiya qilish (5742 + tasodifiy)
+            setInterval(() => {
+                let el = document.getElementById('user-count');
+                let count = parseInt(el.innerText.replace(',', ''));
+                el.innerText = (count + Math.floor(Math.random() * 2)).toLocaleString();
+            }, 5000);
+        };
 
-        function start() {
-            const n = document.getElementById('name').value;
-            const s = document.getElementById('surname').value;
-            if(!n || !s) return alert("To'ldiring!");
-            document.getElementById('p-name').innerText = n + " " + s;
-            document.getElementById('auth').classList.add('hidden');
-            document.getElementById('game').classList.remove('hidden');
-            load();
+        function selectLang(lang) {
+            selectedLang = lang;
+            document.getElementById('btn-en').className = lang === 'en' ? 'py-4 rounded-xl border border-cyan-500 bg-cyan-500/10 text-xs cyber' : 'py-4 rounded-xl border border-white/10 text-xs cyber';
+            document.getElementById('btn-ru').className = lang === 'ru' ? 'py-4 rounded-xl border border-cyan-500 bg-cyan-500/10 text-xs cyber' : 'py-4 rounded-xl border border-white/10 text-xs cyber';
         }
 
-        function load() {
+        function startGame() {
+            const n = document.getElementById('name').value;
+            const s = document.getElementById('surname').value;
+            if(!n || !s) return alert("Ma'lumotlarni to'ldiring!");
+            
+            localStorage.setItem('lx_name', n);
+            localStorage.setItem('lx_surname', s);
+
+            document.getElementById('display-player').innerText = `${n} ${s}`;
+            document.getElementById('display-lang').innerText = selectedLang === 'en' ? 'ENG ➔ UZB' : 'RUS ➔ UZB';
+            document.getElementById('auth-screen').classList.add('hidden');
+            document.getElementById('game-screen').classList.remove('hidden');
+            loadQ();
+        }
+
+        const dict = {
+            en: [{q: "Success", c: "Muvaffaqiyat", o: ["Muvaffaqiyat", "Xato", "Boylik", "Omad"]}, {q: "Knowledge", c: "Bilim", o: ["Bilim", "Kitob", "Dars", "Aqllilik"]}],
+            ru: [{q: "Успех", c: "Muvaffaqiyat", o: ["Muvaffaqiyat", "Xato", "Boylik", "Omad"]}, {q: "Знание", c: "Bilim", o: ["Bilim", "Kitob", "Dars", "Aqllilik"]}]
+        };
+
+        function loadQ() {
             clearInterval(timer);
-            time = 40;
-            const q = dictionary[current % dictionary.length];
-            document.getElementById('word').innerText = q.q;
+            timeLeft = 40;
+            const data = dict[selectedLang][currentQ % dict[selectedLang].length];
+            document.getElementById('word').innerText = data.q;
+            
             const optDiv = document.getElementById('options');
             optDiv.innerHTML = '';
-            
-            q.o.sort(()=>Math.random()-0.5).forEach(o => {
+            data.o.sort(() => Math.random() - 0.5).forEach(opt => {
                 const b = document.createElement('button');
-                b.className = "p-5 glass rounded-2xl hover:bg-cyan-600/20 text-sm";
-                b.innerText = o;
-                b.onclick = () => { if(o === q.c) { current++; load(); } else { alert('Xato! Ball: ' + current); location.reload(); } };
+                b.className = "p-5 glass rounded-2xl hover:bg-cyan-600/20 transition-all cyber text-[10px]";
+                b.innerText = opt;
+                b.onclick = () => { if(opt === data.c) { currentQ++; loadQ(); } else { alert("XATO! Ball: " + currentQ); location.reload(); }};
                 optDiv.appendChild(b);
             });
 
             timer = setInterval(() => {
-                time--;
-                document.getElementById('timer').innerText = (time/10).toFixed(1);
-                document.getElementById('bar').style.width = (time/40)*100 + "%";
-                if(time <= 0) { alert('Vaqt tugadi! Ball: ' + current); location.reload(); }
+                timeLeft--;
+                document.getElementById('timer').innerText = (timeLeft/10).toFixed(1);
+                document.getElementById('p-bar').style.width = (timeLeft/40)*100 + "%";
+                if(timeLeft <= 0) { alert("VAQT TUGADI! Ball: " + currentQ); location.reload(); }
             }, 100);
         }
     </script>
